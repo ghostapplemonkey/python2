@@ -73,7 +73,6 @@ class Check(Sprite):
         global score
         self.time += dt
         if score == 16 and self.time >= 2:
-            score = 0
             self.rx=random.randint(300,600)
             self.ry=random.randint(200,400)
             self.rc = Color.random_rgb()
