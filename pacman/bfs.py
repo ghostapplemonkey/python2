@@ -30,13 +30,13 @@ class Bfs():
                     self.queue.insert(0, n)
                     self.explored.append(n)
         return False
-        print(self.v)
-        print(' ~ '.join([str(i) for i in self.queue]))
+        # print(self.v)
+        # print(' ~ '.join([str(i) for i in self.queue]))
     def path(self):
         self.v = self.end
         path = [self.v]
         while self.v!=self.start:
             self.v = self.parent[self.v]
             path.insert(0,self.v)
-        print(' - '.join([str(i) for i in path]))
+        # print(' - '.join([str(i) for i in path]))
         return path
