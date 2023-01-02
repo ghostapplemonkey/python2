@@ -437,6 +437,7 @@ class Player(Sprite):
         self.x+=self.joy_x*self.speed
         self.y+=self.joy_y*self.speed
         if self.button == 1 and self.have_money==False and self.can_punch==True:
+            self.button = 0
             self.fist = window.create_sprite(Fist, image = "fist.png", position=self.position)
             self.can_punch = False
             Scheduler.wait(6, self.setpunch)
@@ -594,7 +595,7 @@ def create_money():
     for money in window.get_sprites_with_tag("money"):
         if money.place != None:
             money_num+=1
-    if money_num <= 25:
+    if money_num <= 18:
         window.create_sprite(Money, x=random.randint(200, 1080), y=random.randint(200,700))
         money_num+=1
 def create_chest():
