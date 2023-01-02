@@ -55,16 +55,66 @@ class Money(Sprite):
                 self.owner = None
                 self.rotation = 0
                 self.y-=65
-            if window.is_key_down(self.owner.controller[4]):
-                self.owner.have_money = False
-                self.owner = None
-                self.rotation = 0
+            if self.owner:
+                if window.is_key_down(self.owner.controller[4]):
+                    self.owner.have_money = False
+                    self.owner = None
+                    self.rotation = 0
             
 
         elif self.is_touching_any_sprite_with_tag("player"):
             if self.get_touching_sprites_with_tag("player")[0].have_money == False and window.is_key_down(self.get_touching_sprites_with_tag("player")[0].controller[4]):
                 if self.get_touching_sprites_with_tag("player")[0].placenumber != self.place:
                     self.owner = self.get_touching_sprites_with_tag("player")[0]
+                    self.owner.have_money = True
+        else:
+            self.layer = -1000
+
+class Chest(Sprite):
+    def on_create(self):
+        self.image = "chest.png"
+        self.place = None
+        self.scale = 0.3
+        self.owner : Player = None
+        self.layer = -1000
+        self.add_tag("money")
+    def on_update(self, dt):
+        if self.owner:
+            self.position = self.owner.position
+            if self.owner.state == 1:
+                self.y -= 60
+                self.layer = 10000
+                self.rotation = 0
+            if self.owner.state == 3:
+                self.y += 80
+                self.rotation = 0
+                self.layer = -1000
+            if self.owner.state == 0:
+                self.x -= 60
+                self.layer = -1000
+            if self.owner.state == 2:
+                self.x += 60
+                self.layer = -1000
+            if window.is_key_down(self.owner.controller[4]):
+                self.owner.have_money = False
+                self.owner.have_chest = False
+                self.owner = None
+                self.rotation = 0
+            if self.owner:
+                if self.owner.dizzy == True:
+                    self.owner.have_money = False
+                    self.owner.have_chest = False
+                    self.owner = None
+                    self.rotation = 0
+                    self.y-=65
+            
+            
+
+        elif self.is_touching_any_sprite_with_tag("player"):
+            if self.get_touching_sprites_with_tag("player")[0].have_money == False and window.is_key_down(self.get_touching_sprites_with_tag("player")[0].controller[4]):
+                if self.get_touching_sprites_with_tag("player")[0].placenumber != self.place:
+                    self.owner = self.get_touching_sprites_with_tag("player")[0]
+                    self.owner.have_chest = True
                     self.owner.have_money = True
         else:
             self.layer = -1000
@@ -82,9 +132,15 @@ class Time(Label):
         self.font = 'Consolas'
         self.font_size = 35
         self.time = 181
+        self.moneystart = False
     def on_update(self, dt: float):
+            
         if start==True:
             self.time -= dt
+            if self.moneystart == False:
+                self.moneystart = True
+                Scheduler.update(create_money, 4)
+                Scheduler.update(create_chest, 40)
         if self.time <= 0.3:
             global stop
             stop = True
@@ -146,6 +202,8 @@ class Score(Label):
             if money.distance_to(self.ownerplace) < self.ownerplace.width/2:
                 self.score+=1
                 money.place = self.place
+                if money.image == "chest.png":
+                    self.score+=19
             elif money.place == self.place:
                 money.place = None
         self.text = str(self.score)
@@ -168,6 +226,7 @@ class Player(Sprite):
         self.dizzy = False
         self.dizzysprite:Sprite = None
         self.state = 1
+        self.have_chest = False
     def not_dizzy(self):
         self.dizzy = False
         self.dizzysprite.delete()
@@ -182,10 +241,14 @@ class Player(Sprite):
                     self.state = 1
                     self.state_horizantal = 1
                     self.have_money = False
+                    self.have_chest = False
                     Scheduler.wait(2, self.not_dizzy)
         if timer.time > 30:
             if self.have_money:
-                self.speed = 3.5
+                if self.have_chest == False:
+                    self.speed = 3.5
+                else:
+                    self.speed = 1
             else:
                 self.speed = 5
         else:
@@ -269,19 +332,19 @@ label1.owner = player1
 player2 = window.create_sprite(Player, x=60, y=840)
 player2.controller = [KeyCode.T, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.Y, KeyCode.R]
 player2.placenumber = 1
-player2.spritesheet = spritesheet_ninja
+player2.spritesheet = spritesheet_healer
 label2 = window.create_label(PlayerLabel, text="P2", color = Color.GREEN)
 label2.owner = player2
 player3 = window.create_sprite(Player, x=1220, y=120)
 player3.controller = [KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.O, KeyCode.U]
 player3.placenumber = 2
-player3.spritesheet = spritesheet_mage
+player3.spritesheet = spritesheet_healer
 label3 = window.create_label(PlayerLabel, text="P3", color = Color.BLUE)
 label3.owner = player3
 player4 = window.create_sprite(Player, x=1220, y=840)
 player4.controller = [KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.NUM_0, KeyCode.NUM_1]
 player4.placenumber = 3
-player4.spritesheet = spritesheet_townfolk1
+player4.spritesheet = spritesheet_healer
 label4 = window.create_label(PlayerLabel, text="P4", color = Color.YELLOW)
 label4.owner = player4
 
@@ -295,9 +358,15 @@ label4.owner = player4
 
 def create_money():
     global money_num
-    if money_num<15:
+    money_num = 0
+    for money in window.get_sprites_with_tag("money"):
+        if money.place != None:
+            money_num+=1
+    if money_num <= 25:
         window.create_sprite(Money, x=random.randint(200, 1080), y=random.randint(200,700))
         money_num+=1
+def create_chest():
+    window.create_sprite(Chest, x=random.randint(200, 1080), y=random.randint(200,700))
 k=0
 for location, placelocate, color in [(Point(450, 70),Point(0, 0),Color.RED),(Point(450, 880),Point(0, 900),Color.GREEN),(Point(830, 70),Point(1280, 0),Color.BLUE),(Point(830, 880),Point(1280, 900),Color.YELLOW)]:
     place = window.create_sprite(image = "place.png", position = placelocate, layer = -10000, scale = 0.7, opacity = 150)
@@ -321,8 +390,6 @@ black = window.create_sprite(layer = 100001, position = window.center, scale_x =
 
 for i in range(10):
     create_money()
-if stop==False and start==True:
-    Scheduler.update(create_money, 4)
 
 window.run()
 
