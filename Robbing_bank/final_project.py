@@ -177,7 +177,7 @@ class Time(Label):
     def on_create(self):
         self.font = 'Consolas'
         self.font_size = 35
-        self.time = 181
+        self.time = 121
         self.moneystart = False
         self.open_stick = False
     def on_update(self, dt: float):
@@ -198,7 +198,7 @@ class Time(Label):
             if self.moneystart == False:
                 self.moneystart = True
                 Scheduler.update(create_money, 4)
-                Scheduler.update(create_chest, 70)
+                Scheduler.update(create_chest, 50)
                 Scheduler.update(create_juice, 25)
         if self.time <= 0.3:
             global stop
